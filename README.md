@@ -1,4 +1,4 @@
-# AdminLTE MVC + Mongo (Express + EJS)
+# Admin Eaut IoT + Mongo (Express + EJS)
 
 ## Quick start
 
