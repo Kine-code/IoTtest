@@ -1,0 +1,28 @@
+<section class="content">
+  <div class="card">
+    <div class="card-header"><h3 class="card-title"><%= isEdit ? 'Sửa' : 'Thêm' %> tài khoản</h3></div>
+    <div class="card-body">
+      <% if (typeof error !== 'undefined') { %><div class="alert alert-danger"><%= error %></div><% } %>
+      <form method="post" action="<%= isEdit ? '/users/'+userDoc._id+'/edit' : '/users/create' %>">
+        <div class="mb-3"><label class="form-label">Họ và tên</label>
+          <input class="form-control" name="name" value="<%= userDoc.name || '' %>" required/>
+        </div>
+        <div class="mb-3"><label class="form-label">Email</label>
+          <input class="form-control" name="email" type="email" value="<%= userDoc.email || '' %>" required/>
+        </div>
+        <div class="mb-3"><label class="form-label">Mật khẩu <small>(để trống nếu không đổi)</small></label>
+          <input class="form-control" name="password" type="password" <%= isEdit ? '' : 'required' %>/>
+        </div>
+        <div class="mb-3"><label class="form-label">Vai trò</label>
+          <select class="form-select" name="role">
+            <% ['admin','staff','viewer'].forEach(r => { %>
+              <option value="<%= r %>" <%= userDoc.role===r?'selected':'' %>><%= r %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn btn-primary">Lưu</button>
+        <a href="/users" class="btn btn-secondary">Hủy</a>
+      </form>
+    </div>
+  </div>
+</section>

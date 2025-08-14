@@ -1,0 +1,36 @@
+
+<div class="register-box">
+  <div class="register-logo"><a href="/"><b>EAUT</b>IoT</a></div>
+  <div class="card">
+    <div class="card-body register-card-body">
+      <p class="register-box-msg">Đăng kí</p>
+      <% if (typeof error !== 'undefined') { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+      <form action="/auth/register" method="post">
+        <div class="input-group mb-3">
+          <input type="text" name="name" class="form-control" placeholder="Full Name" required />
+          <div class="input-group-text"><span class="bi bi-person"></span></div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="email" name="email" class="form-control" placeholder="Email" required />
+          <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Password" minlength="6" required />
+          <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="terms" required />
+              <label class="form-check-label" for="terms"> Tôi đồng ý <a href="#">với diều khoản</a> </label>
+            </div>
+          </div>
+          <div class="col-4"><div class="d-grid gap-2"><button type="submit" class="btn btn-primary">Đăng ký</button></div></div>
+        </div>
+      </form>
+      <!-- <p class="mb-0 mt-3"><a href="/auth/login" class="text-center">I already have a membership</a></p> -->
+    </div>
+  </div>
+</div>

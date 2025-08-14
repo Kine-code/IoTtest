@@ -1,0 +1,33 @@
+<div class="login-box">
+  <div class="login-logo"><a href="/"><b>EAUT</b>IoT</a></div>
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Đăng nhập</p>
+      <% if (typeof error !== 'undefined') { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+      <form action="/auth/login" method="post">
+        <div class="input-group mb-3">
+          <input type="email" name="email" class="form-control" placeholder="Email" required />
+          <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Password" required />
+          <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+        </div>
+        <div class="row">
+          <div class="col-7">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="remember" />
+              <label class="form-check-label" for="remember">Nhớ tài khoản</label>
+            </div>
+          </div>
+          <div class="col-5">
+            <div class="d-grid gap-2"><button type="submit" class="btn btn-primary">Đăng nhập</button></div>
+          </div>
+        </div>
+      </form>
+      <p class="mb-0 mt-3"><a href="/auth/register" class="text-center">Đăng ký tài khoản?</a></p>
+    </div>
+  </div>
+</div>

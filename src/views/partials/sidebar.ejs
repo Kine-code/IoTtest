@@ -1,0 +1,21 @@
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <div class="sidebar-brand">
+    <a href="/" class="brand-link">
+      <span class="brand-text fw-light"><b>EAUT</b></span>
+    </a>
+  </div>
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <ul class="nav sidebar-menu flex-column" role="navigation">
+        <% (menus || []).forEach(m => { %>
+          <li class="nav-item">
+            <a href="<%= m.path %>" class="nav-link <%= isActive(m.path) %>">
+              <i class="nav-icon <%= m.icon || 'bi bi-circle' %>"></i>
+              <p><%= m.title %></p>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    </nav>
+  </div>
+</aside>
