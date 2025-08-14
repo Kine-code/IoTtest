@@ -37,35 +37,42 @@ app.use((req, res, next) => {
   next();
 });
 
-// Gắn biến dùng chung cho tất cả view
 app.use(async (req, res, next) => {
   try {
-    // Session -> locals dùng chung
     res.locals.user = req.session.user || null;
     res.locals.userRole = req.session.userRole || null;
 
-    // Helper đánh dấu active theo URL hiện tại (bỏ query)
-    const currentPath = req.originalUrl.split('?')[0];
+    // Lấy path hiện tại (bỏ query) và chuẩn hoá bỏ dấu "/" dư ở cuối
+    let currentPath = req.originalUrl.split('?')[0] || '/';
+    if (currentPath.length > 1) currentPath = currentPath.replace(/\/+$/, '');
+
     res.locals.isActive = (href) => {
-      if (href === '/') return currentPath === '/';
-      return currentPath === href || currentPath.startsWith(href + '/') ? 'active' : '';
+      // chuẩn hoá href giống currentPath
+      let h = href || '/';
+      if (h.length > 1) h = h.replace(/\/+$/, '');
+
+      // ĐẶC BIỆT: Dashboard
+      if (h === '/') {
+        // active nếu đang ở trang gốc hoặc path rỗng
+        return (currentPath === '/' || currentPath === '') ? 'active' : '';
+      }
+      // Các mục khác: trùng chính xác hoặc là prefix (/users, /users/123)
+      return (currentPath === h || currentPath.startsWith(h + '/')) ? 'active' : '';
     };
 
-    // NẠP MENU THEO ROLE
+    // --- nạp menus như bạn đã làm ---
     const role = req.session.userRole || 'viewer';
     const items = await Menu.find({ visible: true, roles: { $in: [role] } })
                             .sort({ order: 1 }).lean();
-    res.locals.menus = items; // <-- QUAN TRỌNG
+    res.locals.menus = items;
 
     next();
   } catch (e) {
     console.error('Load menus error:', e);
-    res.locals.menus = []; // fallback an toàn
+    res.locals.menus = [];
     next();
   }
 });
-
-
 
 // View engine
 app.set('views', path.join(__dirname, 'views'));
