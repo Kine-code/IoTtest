@@ -1,0 +1,21 @@
+<section class="content">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/campuses">Cơ sở</a></li>
+      <li class="breadcrumb-item"><a href="/campuses/<%= campus._id %>/buildings"><%= campus.name %></a></li>
+      <li class="breadcrumb-item active"><%= building.name %></li>
+    </ol>
+  </nav>
+  <div class="row">
+    <% floors.forEach(f => { %>
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <a class="card text-decoration-none"
+           href="/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors/<%= f._id %>/rooms">
+          <div class="card-body text-center">
+            <div class="display-6 fw-bold">Tầng <%= f.level %></div>
+          </div>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+</section>

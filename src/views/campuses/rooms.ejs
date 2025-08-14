@@ -1,0 +1,32 @@
+<section class="content">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/campuses">Cơ sở</a></li>
+      <li class="breadcrumb-item"><a href="/campuses/<%= campus._id %>/buildings"><%= campus.name %></a></li>
+      <li class="breadcrumb-item"><a href="/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors"><%= building.name %></a></li>
+      <li class="breadcrumb-item active">Tầng <%= floor.level %></li>
+    </ol>
+  </nav>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <h3 class="card-title mb-0">Phòng tầng <%= floor.level %></h3>
+      <a href="/rooms/create" class="btn btn-primary btn-sm">Thêm phòng</a> <!-- (sau này sẽ link form) -->
+    </div>
+    <div class="card-body p-0">
+      <table class="table mb-0">
+        <thead><tr><th>Mã phòng</th><th>Tên</th><th>Sức chứa</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+          <% rooms.forEach(r => { %>
+            <tr>
+              <td><%= r.code %></td>
+              <td><%= r.name || '' %></td>
+              <td><%= r.capacity || 0 %></td>
+              <td><span class="badge bg-<%= r.isOn ? 'success' : 'secondary' %>"><%= r.isOn ? 'On' : 'Off' %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
-    "seed:menus": "node scripts/seed-menus.js"
+    "seed:menus": "node scripts/seed-menus.js",
+    "seed:campuses": "node scripts/seed-campuses.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

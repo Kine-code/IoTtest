@@ -22,6 +22,7 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+
 // Sessions
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev_secret',
@@ -88,6 +89,7 @@ const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth');
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
+app.use('/campuses', require('./routes/campuses'));
 app.use('/users', require('./routes/users'));
 app.use('/buildings', require('./routes/buildings'));
 app.use('/floors', require('./routes/floors'));
