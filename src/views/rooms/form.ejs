@@ -1,0 +1,45 @@
+<section class="content">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h3 class="card-title mb-0"><%= isEdit ? 'Sửa phòng' : 'Thêm phòng' %></h3>
+    </div>
+    <div class="card-body">
+      <form method="post" action="<%= isEdit ? '/rooms/'+doc._id+'/edit' : '/rooms/create' %>">
+        <% if (!isEdit) { %>
+          <!-- Khi tạo mới, nhận building/floor qua query và post ẩn -->
+          <input type="hidden" name="building" value="<%= doc.building %>">
+          <input type="hidden" name="floor" value="<%= doc.floor %>">
+        <% } %>
+        <input type="hidden" name="returnTo" value="<%= returnTo || '/' %>">
+
+        <div class="row g-3">
+          <% if (isEdit) { %>
+            <div class="col-md-4">
+              <label class="form-label">Mã phòng</label>
+              <input class="form-control" name="code" value="<%= doc.code || '' %>" readonly>
+            </div>
+          <% } %>
+
+          <div class="col-md-4">
+            <label class="form-label">Tên phòng</label>
+            <input class="form-control" name="name" value="<%= doc.name || '' %>" placeholder="VD: Phòng thí nghiệm">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Sức chứa</label>
+            <input type="number" min="0" class="form-control" name="capacity" value="<%= doc.capacity || 0 %>">
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-primary">
+            <i class="bi bi-save me-1"></i> Lưu
+          </button>
+          <a href="<%= returnTo || '/' %>" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

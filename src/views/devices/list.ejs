@@ -1,0 +1,94 @@
+<% const _returnTo = (typeof currentUrl !== 'undefined' && currentUrl) || (locals && locals.currentUrl) || req?.originalUrl || '/devices'; %>
+
+<section class="content">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <h3 class="card-title">Thiết bị</h3>
+      <% if (userRole === 'admin' || userRole === 'staff') { %>
+        <a class="btn btn-primary btn-sm" href="/devices/create" style="margin-left: auto;" >Thêm</a>
+      <% } %>
+    </div>
+    <div class="card-body p-0">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Thiết bị</th>
+            <th>Phòng</th>
+            <th>IP</th>
+            <th>Trạng thái</th>
+            <th>Điều khiển</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% devices.forEach(d => { %>
+            <tr>
+              <td><strong><%= d.name %></strong></td>
+              <td><%= d.room?.code || d.roomCode %></td>
+              <td><code><%= d.espIp %></code></td>
+              <td>
+                <span class="badge bg-<%= d.status === 'online' ? 'success' : (d.status === 'error' ? 'danger' : 'secondary') %>">
+                  <%= d.status %>
+                </span>
+              </td>
+              <td>
+                <% (d.channels || []).forEach(ch => { %>
+                  <form method="post" action="/devices/<%= d._id %>/toggle" class="d-inline">
+                    <input type="hidden" name="key" value="<%= ch.key %>">
+                    <input type="hidden" name="state" value="<%= ch.isOn ? 'off' : 'on' %>">
+                    <input type="hidden" name="returnTo" value="<%= (locals.currentUrl || req?.originalUrl || '/devices') %>">
+
+                    <button class="btn btn-sm <%= ch.isOn ? 'btn-success' : 'btn-outline-secondary' %>">
+                      <i class="bi <%= ch.isOn ? 'bi-lightbulb-fill' : 'bi-lightbulb' %> me-1"></i>
+                      <%= ch.label %> <small>(<%= ch.key %>)</small>
+                    </button>
+                  </form>
+                <% }) %>
+              </td>
+              <td class="text-end">
+                <% if (userRole === 'admin' || userRole === 'staff') { %>
+                  <a class="btn btn-sm btn-warning" href="/devices/<%= d._id %>/edit"><i class="bi bi-pencil-square"></i></a>
+                <% } %>
+                <% if (userRole === 'admin') { %>
+                  <form method="post" action="/devices/<%= d._id %>/delete" class="d-inline"
+                        onsubmit="return confirm('Xóa thiết bị?')">
+                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash3"></i></button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+document.addEventListener('change', async (e) => {
+  const el = e.target.closest('.toggle-switch');
+  if (!el) return;
+  const id  = el.dataset.id;
+  const key = el.dataset.key;
+  const state = el.checked ? 'on' : 'off';
+  try {
+    const res = await fetch(`/devices/${id}/toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, state })
+    });
+    if (!res.ok) throw new Error();
+  } catch {
+    alert('Không gửi được lệnh tới thiết bị');
+    el.checked = !el.checked;
+  }
+});
+
+// Realtime update
+const socket = io();
+socket.on('device:channel', d => {
+  const sw = document.querySelector(`.toggle-switch[data-id="${d.deviceId}"][data-key="${d.key}"]`);
+  if (sw) sw.checked = !!d.isOn;
+});
+</script>

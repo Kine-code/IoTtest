@@ -1,0 +1,43 @@
+<section class="content">
+  <div class="card"style="margin-left: auto;">
+    <div class="card-header"><h3 class="card-title" ><%= isEdit ? 'Sửa' : 'Thêm' %> thiết bị</h3></div>
+    <div class="card-body">
+      <form method="post" action="<%= isEdit ? '/devices/'+doc._id+'/edit' : '/devices/create' %>">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Phòng</label>
+            <select name="room" class="form-select" required>
+              <% rooms.forEach(r => { %>
+                <option value="<%= r._id %>" <%= doc.room && String(doc.room)===String(r._id) ? 'selected':'' %>>
+                  <%= r.code %> - <%= r.name || '' %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <!-- <div class="col-md-4">
+            <label class="form-label">Mã phòng</label>
+            <input class="form-control" name="roomCode" value="<%= doc.roomCode || '' %>" placeholder="VD: P301" required>
+          </div> -->
+          <div class="col-md-6">
+            <label class="form-label">Tên thiết bị</label>
+            <input class="form-control" name="name" value="<%= doc.name || '' %>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">ESP32 IP</label>
+            <input class="form-control" name="espIp" value="<%= doc.espIp || '' %>" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Token</label>
+            <input class="form-control" name="token" value="<%= doc.token || '' %>" required>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button class="btn btn-primary">Lưu</button>
+          <a href="/devices" class="btn btn-secondary">Hủy</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

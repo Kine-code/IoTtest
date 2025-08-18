@@ -1,32 +1,213 @@
-<section class="content">
-  <nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/campuses">Cơ sở</a></li>
-      <li class="breadcrumb-item"><a href="/campuses/<%= campus._id %>/buildings"><%= campus.name %></a></li>
-      <li class="breadcrumb-item"><a href="/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors"><%= building.name %></a></li>
-      <li class="breadcrumb-item active">Tầng <%= floor.level %></li>
-    </ol>
-  </nav>
+<% 
+  const _devicesByRoom = (typeof devicesByRoom !== 'undefined' && devicesByRoom) 
+                         || locals.devicesByRoom 
+                         || {}; 
+%>
 
-  <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <h3 class="card-title mb-0">Phòng tầng <%= floor.level %></h3>
-      <a href="/rooms/create" class="btn btn-primary btn-sm">Thêm phòng</a> <!-- (sau này sẽ link form) -->
+<% const _returnTo = (typeof currentUrl !== 'undefined' && currentUrl) || (locals && locals.currentUrl) || req?.originalUrl || ''; %>
+<div class="card shadow-sm">
+  <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <h3 class="card-title mb-0">
+        <i class="bi bi-door-closed me-1"></i>
+        Phòng tầng <span class="fw-bold"><%= floor.level %></span>
+      </h3>
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+        <i class="bi bi-collection me-1"></i> <span id="room-count"><%= rooms.length %></span> phòng
+      </span>
     </div>
-    <div class="card-body p-0">
-      <table class="table mb-0">
-        <thead><tr><th>Mã phòng</th><th>Tên</th><th>Sức chứa</th><th>Trạng thái</th></tr></thead>
-        <tbody>
-          <% rooms.forEach(r => { %>
-            <tr>
-              <td><%= r.code %></td>
-              <td><%= r.name || '' %></td>
-              <td><%= r.capacity || 0 %></td>
-              <td><span class="badge bg-<%= r.isOn ? 'success' : 'secondary' %>"><%= r.isOn ? 'On' : 'Off' %></span></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+
+    <div class="d-flex gap-2 ms-auto">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-body-tertiary"><i class="bi bi-search"></i></span>
+        <input id="room-search" type="text" class="form-control" placeholder="Tìm mã/tên phòng...">
+      </div>
+      <a
+        href="/rooms/create?building=<%= building._id %>&floor=<%= floor._id %>&returnTo=/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors/<%= floor._id %>/rooms"
+        class="btn btn-primary btn-sm"
+      >
+        <i class="bi bi-plus-lg me-1"></i> Thêm phòng
+      </a>
     </div>
   </div>
-</section>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" id="rooms-table">
+      <thead class="table-light">
+        <tr>
+          <th style="width:14rem">Mã phòng</th>
+          <th>Tên</th>
+          <th style="width:10rem" class="text-center">Sức chứa</th>
+          <th style="width:14rem" class="text-center">Trạng thái</th>
+          <th style="width:18rem">Điều khiển</th>
+          <th style="width:8rem" class="text-end">Tất cả</th>
+          <th style="width:14rem" class="text-end">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="rooms-body">
+        <% if (!rooms.length) { %>
+          <tr class="empty-row">
+            <td colspan="7" class="text-center text-muted py-4">
+              <i class="bi bi-inboxes me-1"></i> Chưa có phòng nào. Nhấn <span class="fw-semibold">Thêm phòng</span>.
+            </td>
+          </tr>
+        <% } %>
+
+        <% rooms.forEach(r => { %>
+          <tr class="room-row" data-room="<%= r._id %>">
+            <td class="fw-semibold">
+              <span class="badge rounded-pill bg-secondary-subtle text-secondary border">
+                <i class="bi bi-hash me-1"></i><%= r.code %>
+              </span>
+            </td>
+            <td class="room-name"><%= r.name || '—' %></td>
+            <td class="text-center room-capacity"><%= r.capacity || 0 %></td>
+
+            <!-- Trạng thái phòng (nếu bạn muốn có) -->
+            <td class="text-center">
+              <form method="post" action="/rooms/<%= r._id %>/toggle-state" class="d-inline">
+                <input type="hidden" name="state" value="<%= r.isOn ? 'false' : 'true' %>">
+                <input type="hidden" name="returnTo" value="<%= _returnTo %>">
+                <button class="btn btn-sm <%= r.isOn ? 'btn-success' : 'btn-outline-secondary' %>">
+                  <i class="bi <%= r.isOn ? 'bi-check-circle' : 'bi-dot' %> me-1"></i>
+                  <%= r.isOn ? 'On' : 'Off' %>
+                </button>
+              </form>
+            </td>
+
+            <!-- Điều khiển từng kênh của các thiết bị thuộc phòng -->
+            <td>
+              <% const devs = _devicesByRoom[String(r._id)] || []; %>
+              <% if (devs.length) { %>
+                <% devs.forEach(d => { %>
+                  <div class="mb-1">
+                    <div class="small fw-semibold"><%= d.name %> <code><%= d.espIp %></code></div>
+                    <% (d.channels || []).forEach(ch => { %>
+                      <form method="post" action="/devices/<%= d._id %>/toggle" class="d-inline">
+                        <input type="hidden" name="key" value="<%= ch.key %>">
+                        <input type="hidden" name="state" value="<%= ch.isOn ? 'off' : 'on' %>">
+                        <input type="hidden" name="returnTo" value="<%= (locals.currentUrl || req?.originalUrl || '') %>">
+                        <button class="btn btn-xs <%= ch.isOn ? 'btn-success' : 'btn-outline-secondary' %>">
+                          <i class="bi <%= ch.isOn ? 'bi-toggle-on' : 'bi-toggle-off' %> me-1"></i>
+                          <%= ch.label %>
+                        </button>
+                      </form>
+                    <% }) %>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <span class="text-muted">Chưa gắn thiết bị</span>
+              <% } %>
+            </td>
+
+            <!-- Bật/Tắt tất cả thiết bị trong phòng -->
+            <td class="text-end">
+              <div class="btn-group btn-group-sm" role="group">
+                <form method="post" action="/rooms/<%= r._id %>/toggle-all" class="d-inline">
+                  <input type="hidden" name="state" value="on">
+                  <input type="hidden" name="returnTo" value="<%= _returnTo %>">
+                  <button class="btn btn-outline-secondary">Bật</button>
+                </form>
+                <form method="post" action="/rooms/<%= r._id %>/toggle-all" class="d-inline">
+                  <input type="hidden" name="state" value="off">
+                  <input type="hidden" name="returnTo" value="<%= _returnTo %>">
+                  <button class="btn btn-outline-secondary">Tắt</button>
+                </form>
+              </div>
+            </td>
+
+            <!-- Thao tác -->
+            <td class="text-end">
+              <a class="btn btn-sm btn-warning me-1"
+                href="/rooms/<%= r._id %>/edit?returnTo=/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors/<%= floor._id %>/rooms"
+                title="Sửa"><i class="bi bi-pencil-square"></i></a>
+              <form method="post" action="/rooms/<%= r._id %>/delete" class="d-inline"
+                    onsubmit="return confirm('Xóa phòng <%= r.code %>?')">
+                <input type="hidden" name="returnTo"
+                      value="/campuses/<%= campus._id %>/buildings/<%= building._id %>/floors/<%= floor._id %>/rooms">
+                <button class="btn btn-sm btn-danger" title="Xóa"><i class="bi bi-trash3"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<!-- <script>
+// Load controls for each room
+(async function loadControls(){
+  const rows = document.querySelectorAll('tr.room-row');
+  for (const tr of rows) {
+    const roomId = tr.dataset.room;
+    const cell = tr.querySelector('.controls');
+    try {
+      const devs = await (await fetch(`/rooms/${roomId}/devices`)).json();
+      if (!devs.length) { cell.innerHTML = '<span class="text-muted">Chưa gắn thiết bị</span>'; continue; }
+      const frag = document.createDocumentFragment();
+      devs.forEach(d => {
+        const wrap = document.createElement('div');
+        wrap.className = 'mb-1';
+        wrap.innerHTML = `<div class="small fw-semibold">${d.name}</div>`;
+        (d.channels || []).forEach(ch => {
+          const id = `${d._id}-${ch.key}`;
+          wrap.innerHTML += `
+            <div class="form-check form-switch d-inline-flex align-items-center me-2">
+              <input class="form-check-input room-dev-switch"
+                     id="${id}" type="checkbox" ${ch.isOn ? 'checked' : ''}
+                     data-device="${d._id}" data-key="${ch.key}">
+              <label class="form-check-label ms-1" for="${id}">${ch.label}</label>
+            </div>`;
+        });
+        frag.appendChild(wrap);
+      });
+      cell.innerHTML = '';
+      cell.appendChild(frag);
+    } catch {
+      cell.innerHTML = '<span class="text-danger">Lỗi tải thiết bị</span>';
+    }
+  }
+})();
+
+// Toggle 1 channel
+document.addEventListener('change', async (e) => {
+  const sw = e.target.closest('.room-dev-switch'); if (!sw) return;
+  try {
+    const res = await fetch(`/devices/${sw.dataset.device}/toggle`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ key: sw.dataset.key, state: sw.checked ? 'on' : 'off' })
+    });
+    if (!res.ok) throw new Error();
+  } catch {
+    alert('Không gửi được lệnh');
+    sw.checked = !sw.checked;
+  }
+});
+
+// Bulk toggle all in room
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.bulk-toggle'); if (!btn) return;
+  const tr = btn.closest('tr.room-row');
+  const roomId = tr.dataset.room;
+  const state = btn.dataset.state;
+  try {
+    const res = await fetch(`/rooms/${roomId}/toggle-all`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ state })
+    });
+    if (!res.ok) throw new Error();
+    tr.querySelectorAll('.room-dev-switch').forEach(sw => sw.checked = (state === 'on'));
+  } catch {
+    alert('Không thể bật/tắt tất cả');
+  }
+});
+
+// Realtime
+const socket = io();
+socket.on('device:channel', d => {
+  const sw = document.querySelector(`.room-dev-switch[data-device="${d.deviceId}"][data-key="${d.key}"]`);
+  if (sw) sw.checked = !!d.isOn;
+});
+</script> -->

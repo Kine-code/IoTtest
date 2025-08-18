@@ -21,9 +21,9 @@
               <td><%= u.email %></td>
               <td><span class="badge bg-secondary"><%= u.role %></span></td>
               <td class="text-end">
-                <a href="/users/<%= u._id %>/edit" class="btn btn-sm btn-warning">Sửa</a>
+                <a href="/users/<%= u._id %>/edit" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
                 <form action="/users/<%= u._id %>/delete" method="post" class="d-inline">
-                  <button class="btn btn-sm btn-danger" onclick="return confirm('Xóa?')">Xóa</button>
+                  <button class="btn btn-sm btn-danger" onclick="return confirm('Xóa?')"><i class="bi bi-trash3"></i></button>
                 </form>
               </td>
             </tr>
