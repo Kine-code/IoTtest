@@ -9,12 +9,14 @@
     "start": "node src/app.js",
     "seed:menus": "node scripts/seed-menus.js",
     "seed:campuses": "node scripts/seed-campuses.js",
-    "seed:floors": "node scripts/seed-floors.js"
+    "seed:floors": "node scripts/seed-floors.js",
+    "seed:logs": "node scripts/seed-logs.js"
   },
   "dependencies": {
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^5.1.0",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",

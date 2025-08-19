@@ -33,10 +33,12 @@ router.post('/create', ctrl.create);
 router.get('/:id/edit', ctrl.editForm);
 router.post('/:id/edit', ctrl.update);
 router.post('/:id/delete', ctrl.remove);
+router.post('/:id/off-all', ctrl.offAll);
 router.get('/:id/devices', async (req, res) => {
   const devices = await Device.find({ room: req.params.id }).lean();
   res.json(devices);
 });
+
 // (Tuỳ chọn) bật/tắt tất cả kênh trong phòng
 const axios = require('axios').default;
 // Lấy danh sách thiết bị của 1 phòng (để render các công tắc)

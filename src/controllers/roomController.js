@@ -117,3 +117,43 @@ exports.toggleState = async (req, res) => {
   const back = req.body.returnTo || req.get('Referrer') || req.session.lastUrl || '/campuses';
   return res.redirect(back);
 };
+exports.offAll = async (req, res) => {
+  try {
+    const roomId = req.params.id;
+    const room = await Room.findById(roomId).populate('devices');
+    if (!room) return res.status(404).send('Room not found');
+
+    for (const dev of room.devices) {
+      for (const ch of dev.channels) {
+        if (ch.isOn) {
+          ch.isOn = false;
+          await Log.create({
+            device: dev._id,
+            room: dev.room,
+            led: ch.key,
+            state: 'off',
+            source: 'admin'
+          });
+        }
+      }
+      await dev.save();
+
+      // gọi xuống ESP để OFF thật sự
+      if (dev.espIp) {
+        try {
+          await axios.post(`http://${dev.espIp}/api/control`, {
+            led: 'ALL',
+            state: 'off'
+          }, { headers: { 'X-Auth': dev.token }});
+        } catch(e) {
+          console.error('Không gọi được ESP', e.message);
+        }
+      }
+    }
+
+    return res.redirect(req.body.returnTo || '/rooms/' + roomId);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Server error');
+  }
+};
